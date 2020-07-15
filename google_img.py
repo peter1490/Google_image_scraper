@@ -3,6 +3,7 @@ import time
 import requests
 import shutil
 import os
+from selenium.webdriver.common.action_chains import ActionChains
 
 driver = webdriver.Chrome()
 directory = 'C:\\Users\eMeSeN\Desktop\instaPhotos\google'
@@ -11,25 +12,27 @@ url = 'https://www.google.com/search?q='+str(inp)+'&source=lnms&tbm=isch&sa=X&ve
 iterate = int(input("Enter how many pics?"))
 
 def save_img(inp,img,i):
-    try:
-        filename = inp+str(i)+'.jpg'
-        response = requests.get(img,stream=True)
-        image_path = os.path.join(directory, filename)
-        with open(image_path, 'wb') as file:
-            shutil.copyfileobj(response.raw, file)
-    except Exception:
-        pass
+    filename = inp+str(i)+'.jpg'
+    response = requests.get(img,stream=True)
+    image_path = os.path.join(directory, filename)
+    with open(image_path, 'wb') as file:
+        shutil.copyfileobj(response.raw, file)
 
 
 def find_urls(inp,url,driver,iterate):
     driver.get(url)
     time.sleep(3)
     for j in range (1,iterate+1):
-        imgurl = driver.find_element_by_xpath('//div//div//div//div//div//div//div//div//div//div['+str(j)+']//a[1]//div[1]//img[1]')
-        imgurl.click()
-        time.sleep(15)
-        img = driver.find_element_by_xpath('//body/div/c-wiz/div/div/div/div/div/div/div[2]/div[1]/div[1]/div[1]/div[1]/div[2]/a[1]/img[1]').get_attribute("src")
-        save_img(inp,img,j)
-            
+        try:
+            imgurl = driver.find_element_by_xpath('//*[@id="islrg"]/div[1]/div['+str(j)+']/a[1]/div[1]/img')
+            actions = ActionChains(driver)
+            actions.move_to_element(imgurl)
+            actions.perform()
+            imgurl.click()
+            time.sleep(1)
+            img = driver.find_element_by_xpath('//*[@id="Sva75c"]/div/div/div[3]/div[2]/c-wiz/div[1]/div[1]/div/div[2]/a/img').get_attribute("src")
+            save_img(inp,img,j)
+        except Exception:
+            pass
 
 find_urls(inp,url,driver,iterate)
